@@ -4,15 +4,16 @@ from llama_index import VectorStoreIndex, GPTVectorStoreIndex, SimpleDirectoryRe
 import weaviate
 
 app = Flask(__name__)
-
 documents = SimpleDirectoryReader('materials').load_data()
 index = GPTVectorStoreIndex.from_documents(documents)
 query_engine = index.as_query_engine(similarity_top_k=5,
                                      response_mode='tree_summarize')
 
+
 @app.route('/')
 def home():
   return render_template('index.html')
+
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -25,6 +26,7 @@ def chat():
 
   output = str(response) + '<br><br>Most Relevant Sources: ' + sources
   return jsonify({'response': output})
+
 
 if __name__ == '__main__':
   app.run(debug=True, host='0.0.0.0', port=8080)
