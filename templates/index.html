@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Course AI</title>
+    <style>
+                body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #chatContainer {
+            width: 90%;
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        #chatLog {
+            width: 100%;
+            height: 385px;
+            border: none;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: scroll;
+        }
+      
+        #inputContainer {
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        #userInput {
+            flex: 1;
+            border: none;
+            padding: 15px 20px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        @media screen and (min-width: 768px) {
+            #chatContainer {
+                width: 80%;
+            }
+            #userInput, button {
+                padding: 10px 20px;
+            }
+        }
+
+        @keyframes thinking {
+            0%   { content: "Bot: ."; }
+            25%  { content: "Bot: .."; }
+            50%  { content: "Bot: ..."; }
+            75%  { content: "Bot: ...."; }
+            100% { content: "Bot: ....."; }
+        }
+
+        #chatLog[data-thinking="true"]:after {
+            content: "Bot: ...";
+            animation: thinking 1.5s infinite;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chatContainer">
+        <div id="header">Course AI</div>
+        <div id="chatLog"></div>
+        <div id="inputContainer">
+            <input type="text" id="userInput" placeholder="Type your message..." onkeydown="checkForEnter(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <script>
+        function sendMessage() {
+            let userInput = document.getElementById('userInput').value;
+            let chatLog = document.getElementById('chatLog');
+
+            if (!userInput.trim()) {
+                return;
+            }
+
+            chatLog.innerHTML += "<div class='user'><b>User:</b> " + userInput + "<br><br></div>";
+            chatLog.setAttribute('data-thinking', 'true');
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: new URLSearchParams({'user_input': userInput}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatLog.removeAttribute('data-thinking');
+                chatLog.innerHTML += "<div class='bot'><b>Bot:</b> " + data.response + "<br><br></div>";
+                chatLog.scrollTop = chatLog.scrollHeight;
+            })
+            .catch(error => {
+                console.error("Error sending message:", error);
+                chatLog.removeAttribute('data-thinking');
+                chatLog.innerHTML += "<div class='bot'>Bot: Error receiving response</div>";
+            });
+
+            document.getElementById('userInput').value = '';
+        }
+
+        function checkForEnter(event) {
+            if (event.keyCode === 13 && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+
+
+</html>
