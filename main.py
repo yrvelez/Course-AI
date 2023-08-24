@@ -6,7 +6,7 @@ import weaviate
 app = Flask(__name__)
 documents = SimpleDirectoryReader('materials').load_data()
 index = GPTVectorStoreIndex.from_documents(documents)
-query_engine = index.as_query_engine(similarity_top_k=5,
+query_engine = index.as_query_engine(similarity_top_k=3,
                                      response_mode='tree_summarize')
 
 
