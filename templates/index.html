@@ -92,11 +92,23 @@
             display: block;
             margin-top: 5px;
         }
+
+              .source-container {
+            cursor: pointer;
+            color: #007bff;
+        }
+        
+        .text-container {
+            display: none;
+            color: #333;
+            padding: 10px 0;
+            border-top: 1px solid #e0e0e0;
+          
     </style>
 </head>
 
 <body>
-    <div id="chatContainer">
+        <div id="chatContainer">
         <div id="header">Course AI</div>
         <div id="chatLog"></div>
         <div id="inputContainer">
@@ -124,16 +136,35 @@
                 body: new URLSearchParams({'user_input': userInput}),
             })
             .then(response => response.json())
-            .then(data => {
+             .then(data => {
                 chatLog.removeAttribute('data-thinking');
                 chatLog.innerHTML += "<div class='bot'><b>Bot:</b> " + data.response + "<br><br></div>";
+                   // Add label for Most Relevant Sources
+    chatLog.innerHTML += "<div class='bot'><b>Most Relevant Sources:</b></div>";
+
+                // Add sources and their text
+                data.sources.forEach(source => {
+                    let sourceContainer = document.createElement('div');
+                    sourceContainer.className = 'source-container';
+                    sourceContainer.innerText = source.source;
+                    let textContainer = document.createElement('div');
+                    textContainer.className = 'text-container';
+                    textContainer.innerText = source.text;
+                    sourceContainer.appendChild(textContainer);
+                    chatLog.appendChild(sourceContainer);
+                });
+
+                   chatLog.innerHTML += "<br>";
+
+
+                document.querySelectorAll('.source-container').forEach(container => {
+                    container.addEventListener('click', function() {
+                        this.querySelector('.text-container').style.display = this.querySelector('.text-container').style.display === 'none' ? 'block' : 'none';
+                    });
+                });
+
                 chatLog.scrollTop = chatLog.scrollHeight;
             })
-            .catch(error => {
-                console.error("Error sending message:", error);
-                chatLog.removeAttribute('data-thinking');
-                chatLog.innerHTML += "<div class='bot'>Bot: Error receiving response</div>";
-            });
 
             document.getElementById('userInput').value = '';
         }
